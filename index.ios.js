@@ -13,7 +13,7 @@ var deviceWidth = Dimensions.get('window').width
 
 var calculateFloorplanScaler = function() {
   var scale = 1
-  var padding = 30 // TODO
+  var padding = 50 // TODO
 
   var widthRatio = floorplan.width / (deviceWidth - (padding * 2))
   var heightRatio = floorplan.height / (deviceHeight - (padding * 2))
@@ -24,7 +24,7 @@ var calculateFloorplanScaler = function() {
     scale = 1 / heightRatio
   }
 
-  return scale
+  return Math.max(1, scale)
 }
 
 var floorplanScale = calculateFloorplanScaler()
@@ -117,7 +117,7 @@ export default class Apartment extends Component {
                 width={b.w}
                 height={b.h}
                 strokeWidth={floorplan.wallWidth}
-                stroke="#333"
+                stroke="#222"
                 fill="none" />
             )
           }, this)}
@@ -130,7 +130,7 @@ export default class Apartment extends Component {
                 cy={l.cy}
                 r={floorplan.lightHitTargetSize}
                 onPress={this.toggleLight(l.id)}
-                fill="rgba(0, 0, 0, .02)"
+                fill="rgba(0, 0, 0, .01)"
                 stroke="none" />
             )
           }, this)}
