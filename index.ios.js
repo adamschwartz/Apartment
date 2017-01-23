@@ -120,6 +120,18 @@ var setLight = function(lightNumber, data) {
     .then((response) => response.json())
 }
 
+var setGroup = function(groupNumber, data) {
+  return fetch('http://' + hue_internalipaddress + '/api/' + hue_username + '/groups/' + groupNumber + '/action', {
+    method: 'PUT',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+    .then((response) => response.json())
+}
+
 export default class Apartment extends Component {
   state = {
     modalVisible: false,
@@ -161,15 +173,26 @@ export default class Apartment extends Component {
       return
     }
 
-    data.on = true
+    if (this.state.activeLight === 'all') {
+      setGroup(1, data)
 
-    setLight(this.state.activeLight, data)
+      apartmentLights.map((light, i) => {
+        this.state.lightOn[light.id] = true
+        this.state.lightHexOverride[light.id] = color
+      })
 
-    this.state.lightOn[this.state.activeLight] = true
-    this.setState({ lightOn: this.state.lightOn })
+      this.setState({ lightOn: this.state.lightOn })
+      this.setState({ lightHexOverride: this.state.lightHexOverride })
 
-    this.state.lightHexOverride[this.state.activeLight] = color
-    this.setState({ lightHexOverride: this.state.lightHexOverride })
+    } else {
+      setLight(this.state.activeLight, data)
+
+      this.state.lightOn[this.state.activeLight] = true
+      this.setState({ lightOn: this.state.lightOn })
+
+      this.state.lightHexOverride[this.state.activeLight] = color
+      this.setState({ lightHexOverride: this.state.lightHexOverride })
+    }
   }
 
   openLightModal(number) {
@@ -195,157 +218,159 @@ export default class Apartment extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <Modal
-          animationType={'slide'}
-          transparent={true}
-          visible={this.state.modalVisible}
-        >
-          <View style={{
-            flex: 1,
-            padding: 32,
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+      <TouchableHighlight style={styles.container} onLongPress={this.openLightModal('all')}>
+        <View style={styles.container} onLongPress={()=>{alert('long press')}}>
+          <Modal
+            animationType={'slide'}
+            transparent={true}
+            visible={this.state.modalVisible}
+          >
             <View style={{
-              width: 256,
-              height: 128,
-              backgroundColor: 'red',
-              borderTopLeftRadius: 13,
-              borderTopRightRadius: 13,
-              borderBottomLeftRadius : 13,
-              borderBottomRightRadius: 13,
+              flex: 1,
+              padding: 32,
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center'
             }}>
               <View style={{
-                flex: 1,
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
+                width: 256,
+                height: 128,
+                backgroundColor: 'red',
+                borderTopLeftRadius: 13,
+                borderTopRightRadius: 13,
+                borderBottomLeftRadius : 13,
+                borderBottomRightRadius: 13,
               }}>
                 <View style={{
-                  width: 256,
-                  height: 64
+                  flex: 1,
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
                 }}>
                   <View style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center'
-                  }}>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#4352fc', { bri: 200, hue: 47125, sat: 253 })
-                      this.setModalVisible(!this.state.modalVisible)
-                    }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#4352fc', borderTopLeftRadius: 13}}/>
-                    </TouchableHighlight>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ef44b9', { bri: 150, hue: 55236, sat: 253 })
-                      this.setModalVisible(!this.state.modalVisible)
-                    }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#ef44b9'}} />
-                    </TouchableHighlight>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ec0f5d', { bri: 200, hue: 65427, sat: 253 })
-                      this.setModalVisible(!this.state.modalVisible)
-                    }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#ec0f5d'}} />
-                    </TouchableHighlight>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ff7e70', { bri: 250, hue: 2871, sat: 157 })
-                      this.setModalVisible(!this.state.modalVisible)
-                    }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#ff7e70', borderTopRightRadius: 13}}/>
-                    </TouchableHighlight>
-                  </View>
-                </View>
-                <View style={{
-                  width: 256,
-                  height: 64
-                }}>
-                  <View style={{
-                    flex: 1,
                     width: 256,
-                    height: 64,
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center'
+                    height: 64
                   }}>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#d5efff', { bri: 254, hue: 34497, sat: 232, ct: 155 })
-                      this.setModalVisible(!this.state.modalVisible)
+                    <View style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center'
                     }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#d5efff', borderBottomLeftRadius: 13}}/>
-                    </TouchableHighlight>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ffffff', { bri: 254, hue: 16423, sat: 38, ct: 279 })
-                      this.setModalVisible(!this.state.modalVisible)
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#3b45fb', { on: true, bri: 200, hue: 47125, sat: 253 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#3b45fb', borderTopLeftRadius: 13}}/>
+                      </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#fd70e7', { on: true, bri: 150, hue: 55236, sat: 253 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#fd70e7'}} />
+                      </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#fc6125', { on: true, bri: 200, hue: 65427, sat: 253 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#fc6125'}} />
+                      </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#fd9765', { on: true, bri: 250, hue: 2871, sat: 157 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#fd9765', borderTopRightRadius: 13}}/>
+                      </TouchableHighlight>
+                    </View>
+                  </View>
+                  <View style={{
+                    width: 256,
+                    height: 64
+                  }}>
+                    <View style={{
+                      flex: 1,
+                      width: 256,
+                      height: 64,
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center'
                     }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#ffffff'}} />
-                    </TouchableHighlight>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ffeece', { bri: 254, hue: 14704, sat: 155, ct: 382 })
-                      this.setModalVisible(!this.state.modalVisible)
-                    }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#ffeece'}} />
-                    </TouchableHighlight>
-                    <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ffd696', { bri: 254, hue: 14704, sat: 155, ct: 494 })
-                      this.setModalVisible(!this.state.modalVisible)
-                    }}>
-                      <View style={{width: 64, height: 64, backgroundColor: '#ffd696', borderBottomRightRadius: 13}}/>
-                    </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#fefbff', { on: true, bri: 254, hue: 34497, sat: 232, ct: 155 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#fefbff', borderBottomLeftRadius: 13}}/>
+                      </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#fec475', { on: true, bri: 254, hue: 14704, sat: 155, ct: 382 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#fec475'}} />
+                      </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#fdb052', { on: true, bri: 254, hue: 14704, sat: 155, ct: 494 })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#fdb052'}} />
+                      </TouchableHighlight>
+                      <TouchableHighlight onPress={() => {
+                        this.setActiveLightColor('#222', { on: false })
+                        this.setModalVisible(!this.state.modalVisible)
+                      }}>
+                        <View style={{width: 64, height: 64, backgroundColor: '#222', borderBottomRightRadius: 13}}/>
+                      </TouchableHighlight>
+                    </View>
                   </View>
                 </View>
               </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
 
-        <Svg height={floorplan.height} width={floorplan.width} style={{transform:[{scale:floorplanScale}]}}>
-          {floorplan.boxes.map(function(b, i) {
-            return (
-              <Rect
-                key={b.id}
-                x={b.x}
-                y={b.y}
-                width={b.w}
-                height={b.h}
-                strokeWidth={floorplan.wallWidth}
-                stroke="#222"
-                fill="none" />
-            )
-          }, this)}
-          {apartmentLights.map(function(l, i) {
-            return (
-              <Circle
-                key={l.id}
-                title={l.title}
-                cx={l.cx}
-                cy={l.cy}
-                r={floorplan.lightHitTargetSize}
-                onPress={this.toggleLight(l.id)}
-                onLongPress={this.openLightModal(l.id)}
-                fill="rgba(0, 0, 0, .01)"
-                stroke="none" />
-            )
-          }, this)}
-          {apartmentLights.map(function(l, i) {
-            return (
-              <Circle
-                key={l.id}
-                title={l.title}
-                cx={l.cx}
-                cy={l.cy}
-                r={floorplan.lightSize}
-                onPress={this.toggleLight(l.id)}
-                onLongPress={this.openLightModal(l.id)}
-                fill={(this.state.lightOn[l.id] && this.state.lights) ? (this.state.lightHexOverride[l.id] || lightStateToHex(this.state.lights[l.id].state)) : (this.state.lightOn[l.id] === false ? '#222' : 'rgba(0, 0, 0, 0)')}
-                stroke="none" />
-            )
-          }, this)}
-        </Svg>
-      </View>
+          <Svg height={floorplan.height} width={floorplan.width} style={{transform:[{scale:floorplanScale}]}}>
+            {floorplan.boxes.map(function(b, i) {
+              return (
+                <Rect
+                  key={b.id}
+                  x={b.x}
+                  y={b.y}
+                  width={b.w}
+                  height={b.h}
+                  strokeWidth={floorplan.wallWidth}
+                  stroke="#222"
+                  fill="none" />
+              )
+            }, this)}
+            {apartmentLights.map(function(l, i) {
+              return (
+                <Circle
+                  key={l.id}
+                  title={l.title}
+                  cx={l.cx}
+                  cy={l.cy}
+                  r={floorplan.lightHitTargetSize}
+                  onPress={this.toggleLight(l.id)}
+                  onLongPress={this.openLightModal(l.id)}
+                  fill="rgba(0, 0, 0, .01)"
+                  stroke="none" />
+              )
+            }, this)}
+            {apartmentLights.map(function(l, i) {
+              return (
+                <Circle
+                  key={l.id}
+                  title={l.title}
+                  cx={l.cx}
+                  cy={l.cy}
+                  r={floorplan.lightSize}
+                  onPress={this.toggleLight(l.id)}
+                  onLongPress={this.openLightModal(l.id)}
+                  fill={(this.state.lightOn[l.id] && this.state.lights) ? (this.state.lightHexOverride[l.id] || lightStateToHex(this.state.lights[l.id].state)) : (this.state.lightOn[l.id] === false ? '#222' : 'rgba(0, 0, 0, 0)')}
+                  stroke="none" />
+              )
+            }, this)}
+          </Svg>
+        </View>
+      </TouchableHighlight>
     )
   }
 }
