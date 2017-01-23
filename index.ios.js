@@ -272,25 +272,25 @@ export default class Apartment extends Component {
                     alignItems: 'center'
                   }}>
                     <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#d5efff')
+                      this.setActiveLightColor('#d5efff', { bri: 254, hue: 34497, sat: 232, ct: 155 })
                       this.setModalVisible(!this.state.modalVisible)
                     }}>
                       <View style={{width: 64, height: 64, backgroundColor: '#d5efff', borderBottomLeftRadius: 13}}/>
                     </TouchableHighlight>
                     <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ffffff')
+                      this.setActiveLightColor('#ffffff', { bri: 254, hue: 16423, sat: 38, ct: 279 })
                       this.setModalVisible(!this.state.modalVisible)
                     }}>
                       <View style={{width: 64, height: 64, backgroundColor: '#ffffff'}} />
                     </TouchableHighlight>
                     <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ffeece')
+                      this.setActiveLightColor('#ffeece', { bri: 254, hue: 14704, sat: 155, ct: 382 })
                       this.setModalVisible(!this.state.modalVisible)
                     }}>
                       <View style={{width: 64, height: 64, backgroundColor: '#ffeece'}} />
                     </TouchableHighlight>
                     <TouchableHighlight onPress={() => {
-                      this.setActiveLightColor('#ffd696')
+                      this.setActiveLightColor('#ffd696', { bri: 254, hue: 14704, sat: 155, ct: 494 })
                       this.setModalVisible(!this.state.modalVisible)
                     }}>
                       <View style={{width: 64, height: 64, backgroundColor: '#ffd696', borderBottomRightRadius: 13}}/>
