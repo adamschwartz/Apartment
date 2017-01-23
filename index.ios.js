@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-import { AppRegistry, StyleSheet, StatusBar, Text, TouchableHighlight, View } from 'react-native'
+import { Modal, AppRegistry, StyleSheet, StatusBar, Text, TouchableHighlight, View } from 'react-native'
 import Svg, { Circle, Line, Path, Rect} from 'react-native-svg'
 import Dimensions from 'Dimensions'
 
 // TODO
 import apartment from './apartment.js'
 var floorplan = apartment.floorplan
-var lights = apartment.lights
+var apartmentLights = apartment.lights
 
 var deviceHeight = Dimensions.get('window').height
 var deviceWidth = Dimensions.get('window').width
@@ -121,27 +121,32 @@ var setLight = function(lightNumber, data) {
 }
 
 export default class Apartment extends Component {
-  constructor(props) {
-    super(props)
+  state = {
+    modalVisible: false,
+    activeLight: -1,
 
-    this.state = {
-      lightOn: {},
-      lights: {}
-    }
+    lightOn: {},
+    lightHexOverride: {},
+    lights: undefined
+  }
 
+  componentDidMount() {
     this.updateLightStates()
     this.periodicallyCheckLightStates()
   }
 
-  updateLightStates() {
-    getLights().then((lightsData) => {
-      console.log(lightsData)
+  setModalVisible(visible) {
+    this.setState({ modalVisible: visible })
+  }
 
-      lights.map((light, i) => {
-        this.state.lightOn[light.id] = lightsData[light.id].state.on
+  updateLightStates() {
+    getLights().then((lights) => {
+      apartmentLights.map((light, i) => {
+        this.state.lightOn[light.id] = lights[light.id].state.on
       })
       this.setState({ lightOn: this.state.lightOn })
-      this.setState({ lightsData: lightsData })
+      this.setState({ lights: lights })
+      this.setState({ lightHexOverride: {} })
     })
   }
 
@@ -151,11 +156,32 @@ export default class Apartment extends Component {
     }, 20 * 1000)
   }
 
+  setActiveLightColor(color, data) {
+    if (this.state.activeLight === -1 || !this.state.lights) {
+      return
+    }
+
+    data.on = true
+
+    setLight(this.state.activeLight, data)
+
+    this.state.lightOn[this.state.activeLight] = true
+    this.setState({ lightOn: this.state.lightOn })
+
+    this.state.lightHexOverride[this.state.activeLight] = color
+    this.setState({ lightHexOverride: this.state.lightHexOverride })
+  }
+
+  openLightModal(number) {
+    return () => {
+      this.setState({ activeLight: number })
+      this.setModalVisible(true)
+    }
+  }
+
   toggleLight(number) {
     return () => {
       if (!this.state.lightOn[number]) {
-        // TODO - use once we have long press to change color
-        // setLight(number, { on: true, bri: 200, hue: 11079 })
         setLight(number, { on: true })
         this.state.lightOn[number] = true
         this.setState({ lightOn: this.state.lightOn })
@@ -167,12 +193,115 @@ export default class Apartment extends Component {
     }
   }
 
-  // TODO - use `onLongPress` touch events for light svg circles
   render() {
-    // `key`s below needed or react complains with:
-    // "Warning: Each child in an array or iterator should have a unique "key" prop."
     return (
       <View style={styles.container}>
+        <Modal
+          animationType={'slide'}
+          transparent={true}
+          visible={this.state.modalVisible}
+        >
+          <View style={{
+            flex: 1,
+            padding: 32,
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <View style={{
+              width: 256,
+              height: 128,
+              backgroundColor: 'red',
+              borderTopLeftRadius: 13,
+              borderTopRightRadius: 13,
+              borderBottomLeftRadius : 13,
+              borderBottomRightRadius: 13,
+            }}>
+              <View style={{
+                flex: 1,
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}>
+                <View style={{
+                  width: 256,
+                  height: 64
+                }}>
+                  <View style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center'
+                  }}>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#4352fc', { bri: 200, hue: 47125, sat: 253 })
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#4352fc', borderTopLeftRadius: 13}}/>
+                    </TouchableHighlight>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#ef44b9', { bri: 150, hue: 55236, sat: 253 })
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#ef44b9'}} />
+                    </TouchableHighlight>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#ec0f5d', { bri: 200, hue: 65427, sat: 253 })
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#ec0f5d'}} />
+                    </TouchableHighlight>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#ff7e70', { bri: 250, hue: 2871, sat: 157 })
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#ff7e70', borderTopRightRadius: 13}}/>
+                    </TouchableHighlight>
+                  </View>
+                </View>
+                <View style={{
+                  width: 256,
+                  height: 64
+                }}>
+                  <View style={{
+                    flex: 1,
+                    width: 256,
+                    height: 64,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center'
+                  }}>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#d5efff')
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#d5efff', borderBottomLeftRadius: 13}}/>
+                    </TouchableHighlight>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#ffffff')
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#ffffff'}} />
+                    </TouchableHighlight>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#ffeece')
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#ffeece'}} />
+                    </TouchableHighlight>
+                    <TouchableHighlight onPress={() => {
+                      this.setActiveLightColor('#ffd696')
+                      this.setModalVisible(!this.state.modalVisible)
+                    }}>
+                      <View style={{width: 64, height: 64, backgroundColor: '#ffd696', borderBottomRightRadius: 13}}/>
+                    </TouchableHighlight>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         <Svg height={floorplan.height} width={floorplan.width} style={{transform:[{scale:floorplanScale}]}}>
           {floorplan.boxes.map(function(b, i) {
             return (
@@ -187,7 +316,7 @@ export default class Apartment extends Component {
                 fill="none" />
             )
           }, this)}
-          {lights.map(function(l, i) {
+          {apartmentLights.map(function(l, i) {
             return (
               <Circle
                 key={l.id}
@@ -196,11 +325,12 @@ export default class Apartment extends Component {
                 cy={l.cy}
                 r={floorplan.lightHitTargetSize}
                 onPress={this.toggleLight(l.id)}
+                onLongPress={this.openLightModal(l.id)}
                 fill="rgba(0, 0, 0, .01)"
                 stroke="none" />
             )
           }, this)}
-          {lights.map(function(l, i) {
+          {apartmentLights.map(function(l, i) {
             return (
               <Circle
                 key={l.id}
@@ -209,7 +339,8 @@ export default class Apartment extends Component {
                 cy={l.cy}
                 r={floorplan.lightSize}
                 onPress={this.toggleLight(l.id)}
-                fill={(this.state.lightOn[l.id] && this.state.lightsData) ? lightStateToHex(this.state.lightsData[l.id].state) : (this.state.lightOn[l.id] === false ? '#222' : 'rgba(0, 0, 0, 0)')}
+                onLongPress={this.openLightModal(l.id)}
+                fill={(this.state.lightOn[l.id] && this.state.lights) ? (this.state.lightHexOverride[l.id] || lightStateToHex(this.state.lights[l.id].state)) : (this.state.lightOn[l.id] === false ? '#222' : 'rgba(0, 0, 0, 0)')}
                 stroke="none" />
             )
           }, this)}
