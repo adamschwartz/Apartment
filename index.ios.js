@@ -197,6 +197,9 @@ export default class Apartment extends Component {
 
   openLightModal(number) {
     return () => {
+      if (this.state.modalVisible) {
+        return
+      }
       this.setState({ activeLight: number })
       this.setModalVisible(true)
     }
@@ -219,111 +222,122 @@ export default class Apartment extends Component {
   render() {
     return (
       <TouchableHighlight style={styles.container} onLongPress={this.openLightModal('all')}>
-        <View style={styles.container} onLongPress={()=>{alert('long press')}}>
+        <View style={styles.container}>
           <Modal
             animationType={'slide'}
             transparent={true}
             visible={this.state.modalVisible}
           >
-            <View style={{
-              flex: 1,
-              padding: 32,
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
+            <TouchableHighlight
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+              onPress={() => {
+                this.setModalVisible(!this.state.modalVisible)
+              }}
+            >
               <View style={{
-                width: 256,
-                height: 128,
-                backgroundColor: 'red',
-                borderTopLeftRadius: 13,
-                borderTopRightRadius: 13,
-                borderBottomLeftRadius : 13,
-                borderBottomRightRadius: 13,
-              }}>
+                flex: 1,
+                padding: 32,
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+                }}>
                 <View style={{
-                  flex: 1,
-                  flexDirection: 'column',
-                  justifyContent: 'flex-end',
-                  alignItems: 'center',
+                  width: 256,
+                  height: 128,
+                  backgroundColor: 'red',
+                  borderTopLeftRadius: 13,
+                  borderTopRightRadius: 13,
+                  borderBottomLeftRadius : 13,
+                  borderBottomRightRadius: 13,
                 }}>
                   <View style={{
-                    width: 256,
-                    height: 64
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
                   }}>
                     <View style={{
-                      flex: 1,
-                      flexDirection: 'row',
-                      justifyContent: 'flex-end',
-                      alignItems: 'center'
-                    }}>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#3b45fb', { on: true, bri: 200, hue: 47125, sat: 253 })
-                        this.setModalVisible(!this.state.modalVisible)
-                      }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#3b45fb', borderTopLeftRadius: 13}}/>
-                      </TouchableHighlight>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#fd70e7', { on: true, bri: 150, hue: 55236, sat: 253 })
-                        this.setModalVisible(!this.state.modalVisible)
-                      }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#fd70e7'}} />
-                      </TouchableHighlight>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#fc6125', { on: true, bri: 200, hue: 65427, sat: 253 })
-                        this.setModalVisible(!this.state.modalVisible)
-                      }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#fc6125'}} />
-                      </TouchableHighlight>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#fd9765', { on: true, bri: 250, hue: 2871, sat: 157 })
-                        this.setModalVisible(!this.state.modalVisible)
-                      }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#fd9765', borderTopRightRadius: 13}}/>
-                      </TouchableHighlight>
-                    </View>
-                  </View>
-                  <View style={{
-                    width: 256,
-                    height: 64
-                  }}>
-                    <View style={{
-                      flex: 1,
                       width: 256,
-                      height: 64,
-                      flexDirection: 'row',
-                      justifyContent: 'flex-end',
-                      alignItems: 'center'
+                      height: 64
                     }}>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#fefbff', { on: true, bri: 254, hue: 34497, sat: 232, ct: 155 })
-                        this.setModalVisible(!this.state.modalVisible)
+                      <View style={{
+                        flex: 1,
+                        flexDirection: 'row',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center'
                       }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#fefbff', borderBottomLeftRadius: 13}}/>
-                      </TouchableHighlight>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#fec475', { on: true, bri: 254, hue: 14704, sat: 155, ct: 382 })
-                        this.setModalVisible(!this.state.modalVisible)
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#3b45fb', { on: true, bri: 200, hue: 47125, sat: 253 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#3b45fb', borderTopLeftRadius: 13}}/>
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#fd70e7', { on: true, bri: 150, hue: 55236, sat: 253 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#fd70e7'}} />
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#fc6125', { on: true, bri: 200, hue: 65427, sat: 253 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#fc6125'}} />
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#fd9765', { on: true, bri: 250, hue: 2871, sat: 157 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#fd9765', borderTopRightRadius: 13}}/>
+                        </TouchableHighlight>
+                      </View>
+                    </View>
+                    <View style={{
+                      width: 256,
+                      height: 64
+                    }}>
+                      <View style={{
+                        flex: 1,
+                        width: 256,
+                        height: 64,
+                        flexDirection: 'row',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center'
                       }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#fec475'}} />
-                      </TouchableHighlight>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#fdb052', { on: true, bri: 254, hue: 14704, sat: 155, ct: 494 })
-                        this.setModalVisible(!this.state.modalVisible)
-                      }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#fdb052'}} />
-                      </TouchableHighlight>
-                      <TouchableHighlight onPress={() => {
-                        this.setActiveLightColor('#222', { on: false })
-                        this.setModalVisible(!this.state.modalVisible)
-                      }}>
-                        <View style={{width: 64, height: 64, backgroundColor: '#222', borderBottomRightRadius: 13}}/>
-                      </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#fefbff', { on: true, bri: 254, hue: 34497, sat: 232, ct: 155 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#fefbff', borderBottomLeftRadius: 13}}/>
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#fec475', { on: true, bri: 254, hue: 14704, sat: 155, ct: 382 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#fec475'}} />
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#fdb052', { on: true, bri: 254, hue: 14704, sat: 155, ct: 494 })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#fdb052'}} />
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={() => {
+                          this.setActiveLightColor('#222', { on: false })
+                          this.setModalVisible(!this.state.modalVisible)
+                        }}>
+                          <View style={{width: 64, height: 64, backgroundColor: '#222', borderBottomRightRadius: 13}}/>
+                        </TouchableHighlight>
+                      </View>
                     </View>
                   </View>
                 </View>
               </View>
-            </View>
+            </TouchableHighlight>
           </Modal>
 
           <Svg height={floorplan.height} width={floorplan.width} style={{transform:[{scale:floorplanScale}]}}>
