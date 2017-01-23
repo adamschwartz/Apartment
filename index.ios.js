@@ -66,16 +66,23 @@ export default class Apartment extends Component {
       lightOn: {}
     }
 
-    this.initializeLightsState()
+    this.updateLightStates()
+    this.periodicallyCheckLightStates()
   }
 
-  initializeLightsState() {
+  updateLightStates() {
     getLights().then((responseJson) => {
       lights.map((light, i) => {
         this.state.lightOn[light.id] = responseJson[light.id].state.on
         this.setState({ lightOn: this.state.lightOn })
       })
     })
+  }
+
+  periodicallyCheckLightStates() {
+    setInterval(() => {
+      this.updateLightStates()
+    }, 20 * 1000)
   }
 
   toggleLight(number) {
