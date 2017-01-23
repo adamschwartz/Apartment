@@ -9,6 +9,12 @@ Setup:
 ± react-native run-ios
 ```
 
+Debugger:
+
+```
+http://localhost:8081/debugger-ui
+```
+
 Release:
 
 ```
