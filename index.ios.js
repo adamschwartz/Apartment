@@ -3,82 +3,25 @@ import { Modal, AppRegistry, StyleSheet, StatusBar, Text, TouchableHighlight, Vi
 import Svg, { Circle, Line, Path, Rect} from 'react-native-svg'
 import Dimensions from 'Dimensions'
 
-// TODO
-import apartment from './apartment.js'
-var floorplan = apartment.floorplan
-var apartmentLights = apartment.lights
+import Light from './light.js'
+import Colors from './colors.js'
+import ApartmentData from './apartment-data.js'
+import HUE from './hue.js'
 
-var deviceHeight = Dimensions.get('window').height
-var deviceWidth = Dimensions.get('window').width
+StatusBar.setHidden(true, false)
 
-var lightStateToHex = function(lightState) {
-  return xyBriToHex(lightState.xy[0], lightState.xy[1], lightState.bri)
-}
+const floorplan = ApartmentData.floorplan
+const apartmentLights = ApartmentData.lights
 
-// TODO
-// use https://github.com/bjohnso5/hue-hacking/blob/master/src/colors.js for colors
+const deviceHeight = Dimensions.get('window').height
+const deviceWidth = Dimensions.get('window').width
 
-// http://stackoverflow.com/questions/22894498/philips-hue-convert-xy-from-api-to-hex-or-rgb
-var xyBriToHex = function(x, y, bri) {
-  var z = 1.0 - x - y
-  var Y = bri / 255.0 // Brightness of lamp
-  var X = (Y / y) * x
-  var Z = (Y / y) * z
-  var r = X * 1.612 - Y * 0.203 - Z * 0.302
-  var g = -X * 0.509 + Y * 1.412 + Z * 0.066
-  var b = X * 0.026 - Y * 0.072 + Z * 0.962
-  r = r <= 0.0031308 ? 12.92 * r : (1.0 + 0.055) * Math.pow(r, (1.0 / 2.4)) - 0.055
-  g = g <= 0.0031308 ? 12.92 * g : (1.0 + 0.055) * Math.pow(g, (1.0 / 2.4)) - 0.055
-  b = b <= 0.0031308 ? 12.92 * b : (1.0 + 0.055) * Math.pow(b, (1.0 / 2.4)) - 0.055
-  var maxValue = Math.max(r, g, b)
-  r /= maxValue
-  g /= maxValue
-  b /= maxValue
-  r = r * 255
-  if (r < 0) { r = 255 }
-  g = g * 255
-  if (g < 0) { g = 255 }
-  b = b * 255
-  if (b < 0) { b = 255 }
-  r = Math.round(r).toString(16)
-  g = Math.round(g).toString(16)
-  b = Math.round(b).toString(16)
-  if (r.length < 2) { r = '0' + r }
-  if (g.length < 2) { g = '0' + g }
-  if (b.length < 2) { b = '0' + b }
-  return '#' + r + g + b
-}
+const calculateFloorplanScaler = function(floorplan) {
+  let scale = 1
+  const padding = 50 // TODO
 
-// // https://developers.meethue.com/content/rgb-hue-color0-65535-javascript-language
-// var rgbToXY = function (red, green, blue) {
-//   //Gamma correctie
-//   red = (red > 0.04045) ? Math.pow((red + 0.055) / (1.0 + 0.055), 2.4) : (red / 12.92);
-//   green = (green > 0.04045) ? Math.pow((green + 0.055) / (1.0 + 0.055), 2.4) : (green / 12.92);
-//   blue = (blue > 0.04045) ? Math.pow((blue + 0.055) / (1.0 + 0.055), 2.4) : (blue / 12.92);
-
-//   //Apply wide gamut conversion D65
-//   var X = red * 0.664511 + green * 0.154324 + blue * 0.162028;
-//   var Y = red * 0.283881 + green * 0.668433 + blue * 0.047685;
-//   var Z = red * 0.000088 + green * 0.072310 + blue * 0.986039;
-
-//   var fx = X / (X + Y + Z);
-//   var fy = Y / (X + Y + Z);
-//   if (isnan(fx)) {
-//     //fx = 0.0f;
-//   }
-//   if (isnan(fy)) {
-//     //fy = 0.0f;
-//   }
-
-//   return [fx.toPrecision(4),fy.toPrecision(4)];
-// }
-
-var calculateFloorplanScaler = function() {
-  var scale = 1
-  var padding = 50 // TODO
-
-  var widthRatio = floorplan.width / (deviceWidth - (padding * 2))
-  var heightRatio = floorplan.height / (deviceHeight - (padding * 2))
+  const widthRatio = floorplan.width / (deviceWidth - (padding * 2))
+  const heightRatio = floorplan.height / (deviceHeight - (padding * 2))
 
   if (widthRatio > heightRatio) {
     scale = 1 / widthRatio
@@ -89,48 +32,22 @@ var calculateFloorplanScaler = function() {
   return Math.max(1, scale)
 }
 
-var floorplanScale = calculateFloorplanScaler()
+const floorplanScale = calculateFloorplanScaler(ApartmentData.floorplan)
 
-StatusBar.setHidden(true, false)
-
-// TODO
-var hue_username = 'Zhbo-QPHAradDdtdc-4tYfjiUfvaIZYZ5yFBWDXQ'
-var hue_internalipaddress = '10.0.0.206'
-
-var getLights = function() {
-  return fetch('http://' + hue_internalipaddress + '/api/' + hue_username + '/lights', {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  })
-    .then((response) => response.json())
+const lightStateToHex = function(lightState) {
+  return '#' + Colors.CIE1931ToHex(lightState.xy[0], lightState.xy[1], lightState.bri)
 }
 
-var setLight = function(lightNumber, data) {
-  return fetch('http://' + hue_internalipaddress + '/api/' + hue_username + '/lights/' + lightNumber + '/state', {
-    method: 'PUT',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-    .then((response) => response.json())
-}
-
-var setGroup = function(groupNumber, data) {
-  return fetch('http://' + hue_internalipaddress + '/api/' + hue_username + '/groups/' + groupNumber + '/action', {
-    method: 'PUT',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-    .then((response) => response.json())
-}
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: '#000'
+  }
+})
 
 export default class Apartment extends Component {
   state = {
@@ -152,7 +69,7 @@ export default class Apartment extends Component {
   }
 
   updateLightStates() {
-    getLights().then((lights) => {
+    HUE.getLights().then((lights) => {
       apartmentLights.map((light, i) => {
         this.state.lightOn[light.id] = lights[light.id].state.on
       })
@@ -165,7 +82,7 @@ export default class Apartment extends Component {
   periodicallyCheckLightStates() {
     setInterval(() => {
       this.updateLightStates()
-    }, 20 * 1000)
+    }, 5 * 1000) // TODO - use decay based on last touch event
   }
 
   setActiveLightColor(color, data) {
@@ -174,7 +91,7 @@ export default class Apartment extends Component {
     }
 
     if (this.state.activeLight === 'all') {
-      setGroup(1, data)
+      HUE.setGroup(1, data)
 
       apartmentLights.map((light, i) => {
         this.state.lightOn[light.id] = true
@@ -185,7 +102,7 @@ export default class Apartment extends Component {
       this.setState({ lightHexOverride: this.state.lightHexOverride })
 
     } else {
-      setLight(this.state.activeLight, data)
+      HUE.setLight(this.state.activeLight, data)
 
       this.state.lightOn[this.state.activeLight] = true
       this.setState({ lightOn: this.state.lightOn })
@@ -208,11 +125,11 @@ export default class Apartment extends Component {
   toggleLight(number) {
     return () => {
       if (!this.state.lightOn[number]) {
-        setLight(number, { on: true })
+        HUE.setLight(number, { on: true })
         this.state.lightOn[number] = true
         this.setState({ lightOn: this.state.lightOn })
       } else {
-        setLight(number, { on: false })
+        HUE.setLight(number, { on: false })
         this.state.lightOn[number] = false
         this.setState({ lightOn: this.state.lightOn })
       }
@@ -220,6 +137,8 @@ export default class Apartment extends Component {
   }
 
   render() {
+    // TODO - show animation on open?
+    // http://stackoverflow.com/a/35183518
     return (
       <TouchableHighlight style={styles.container} onLongPress={this.openLightModal('all')}>
         <View style={styles.container}>
@@ -244,7 +163,7 @@ export default class Apartment extends Component {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center'
-                }}>
+              }}>
                 <View style={{
                   width: 256,
                   height: 128,
@@ -340,62 +259,52 @@ export default class Apartment extends Component {
             </TouchableHighlight>
           </Modal>
 
-          <Svg height={floorplan.height} width={floorplan.width} style={{transform:[{scale:floorplanScale}]}}>
-            {floorplan.boxes.map(function(b, i) {
+          <View style={{
+            position: 'absolute',
+            left: (deviceWidth - floorplan.width) / 2,
+            top: (deviceHeight - floorplan.height) / 2,
+            width: floorplan.width,
+            height: floorplan.height,
+            transform:[{scale:floorplanScale}]
+          }}>
+
+            <Svg height={floorplan.height} width={floorplan.width}>
+              {floorplan.boxes.map(function(b, i) {
+                return (
+                  <Rect
+                    key={b.id}
+                    x={b.x}
+                    y={b.y}
+                    width={b.w}
+                    height={b.h}
+                    strokeWidth={floorplan.wallWidth}
+                    stroke="#222"
+                    fill="none"
+                  />
+                )
+              }, this)}
+            </Svg>
+
+            {apartmentLights.map(function(light) {
               return (
-                <Rect
-                  key={b.id}
-                  x={b.x}
-                  y={b.y}
-                  width={b.w}
-                  height={b.h}
-                  strokeWidth={floorplan.wallWidth}
-                  stroke="#222"
-                  fill="none" />
+                <Light
+                  key={light.id}
+                  cx={light.cx}
+                  cy={light.cy}
+                  radius={floorplan.lightRadius}
+                  pressRadius={floorplan.pressRadius}
+                  on={this.state.lightOn[light.id]}
+                  color={(this.state.lightOn[light.id] && this.state.lights) ? (this.state.lightHexOverride[light.id] || lightStateToHex(this.state.lights[light.id].state)) : (this.state.lightOn[light.id] === false ? '#222' : 'rgba(0, 0, 0, 0)')}
+                  onPress={this.toggleLight(light.id)}
+                  onLongPress={this.openLightModal(light.id)}
+                />
               )
             }, this)}
-            {apartmentLights.map(function(l, i) {
-              return (
-                <Circle
-                  key={l.id}
-                  title={l.title}
-                  cx={l.cx}
-                  cy={l.cy}
-                  r={floorplan.lightHitTargetSize}
-                  onPress={this.toggleLight(l.id)}
-                  onLongPress={this.openLightModal(l.id)}
-                  fill="rgba(0, 0, 0, .01)"
-                  stroke="none" />
-              )
-            }, this)}
-            {apartmentLights.map(function(l, i) {
-              return (
-                <Circle
-                  key={l.id}
-                  title={l.title}
-                  cx={l.cx}
-                  cy={l.cy}
-                  r={floorplan.lightSize}
-                  onPress={this.toggleLight(l.id)}
-                  onLongPress={this.openLightModal(l.id)}
-                  fill={(this.state.lightOn[l.id] && this.state.lights) ? (this.state.lightHexOverride[l.id] || lightStateToHex(this.state.lights[l.id].state)) : (this.state.lightOn[l.id] === false ? '#222' : 'rgba(0, 0, 0, 0)')}
-                  stroke="none" />
-              )
-            }, this)}
-          </Svg>
+          </View>
         </View>
       </TouchableHighlight>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000'
-  }
-})
 
 AppRegistry.registerComponent('Apartment', () => Apartment)

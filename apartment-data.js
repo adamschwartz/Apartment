@@ -3,8 +3,8 @@ module.exports = {
     height: 456,
     width: 240,
     wallWidth: 1,
-    lightSize: 8,
-    lightHitTargetSize: 35,
+    lightRadius: 8,
+    pressRadius: 22,
     boxes: [
       { id: 1, x:   5, y:   5, w: 230, h: 446 }, // Apartment
       { id: 2, x:   5, y: 160, w: 110, h:  70 }, // Stairs
